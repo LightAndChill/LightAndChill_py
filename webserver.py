@@ -11,18 +11,43 @@ import time
 
 global select_mode
 global colorAuto
+valuetest = 0
+
+def sendColor(red, green, blue):
+    url_send = 'http://10.13.9.37/arduino/color/' + str(red) + '/' + str(green) + '/' + str(blue)
+    #print url_send
+    urllib2.urlopen(url_send)
+    #time.sleep(0.001) # 1ms
 
 def rainbow():
-    print("Thread started!")
-    #url = 'http://10.13.9.37/arduino/manual/100/0/0'
-    #response = urllib2.urlopen(url).read()
-            
-    #self.send_response(200)
-    #self.end_headers()
-    #self.wfile.write(response)
+    global valuetest
+    while(valuetest):
+        print("Thread started!")
+        red = 255
+        green = 0
+        blue = 0
+        for i in range(0, 255):
+            blue += 1
+            sendColor(red, green, blue)
+        for i in range(0, 255):
+            red -= 1
+            sendColor(red, green, blue)
+        for i in range(0, 255):
+            green += 1
+            sendColor(red, green, blue)
+        for i in range(0, 255):
+            blue -= 1
+            sendColor(red, green, blue)
+        for i in range(0, 255):
+            red += 1
+            sendColor(red, green, blue)
+        for i in range(0, 255):
+            green -= 1
+            sendColor(red, green, blue)
 
 class GetHandler(BaseHTTPRequestHandler):
     def select_MODE(self):
+        global valuetest
         select_mode = 0
         color_auto = 0
         parsed_path = urlparse.urlparse(self.path)
@@ -31,11 +56,13 @@ class GetHandler(BaseHTTPRequestHandler):
 
         if cleaned[1] == 'auto' and cleaned[2] == '1' :
             colorAuto = threading.Thread(target=rainbow)
+            valuetest = 1
             colorAuto.start()
             
         if cleaned[1] == 'auto' and cleaned[2] == '0' :
-            colorAuto = threading.Thread(target=rainbow)
-            colorAuto.stop()
+            valuetest = 0
+            colorAuto._stop()
+            print("Thread stopped!")
             
         if cleaned[1] == 'manual' :
             select_mode = 'color/' + cleaned[2] + '/' + cleaned[3] + '/' + cleaned[4]
@@ -45,7 +72,7 @@ class GetHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         mode = self.select_MODE()
-
+        
         if mode != 0:
             url = 'http://10.13.9.37/arduino/' + mode
             response = urllib2.urlopen(url).read()
