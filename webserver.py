@@ -85,6 +85,6 @@ class GetHandler(BaseHTTPRequestHandler):
 if __name__ == '__main__':
 
     from BaseHTTPServer import HTTPServer
-    server = HTTPServer(('localhost', 8080), GetHandler)
+    server = HTTPServer(('10.13.9.53', 8080), GetHandler)
     print 'Starting LightAndChill server on 8080, use <Ctrl-C> to stop'
     server.serve_forever()
